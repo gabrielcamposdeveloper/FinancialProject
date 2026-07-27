@@ -12,10 +12,8 @@ public class Transaction
     public DateTime? LiquidationDate { get; private set; }
     public TransactionStatus? Status { get; private set; }
     
-    // Propriedade para controlar a concorrência no Entity Framework (Optimistic Concurrency)
     public byte[]? RowVersion { get; private set; } 
 
-    // Construtor vazio necessário apenas para o EF Core
     protected Transaction() { }
 
     private Transaction(string description, decimal amount, DateTime dueDate)
