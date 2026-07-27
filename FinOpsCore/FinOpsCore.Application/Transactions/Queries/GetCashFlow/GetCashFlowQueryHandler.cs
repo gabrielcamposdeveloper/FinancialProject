@@ -9,7 +9,6 @@ public class GetCashFlowQueryHandler : IRequestHandler<GetCashFlowQuery, Result<
 {
     private readonly ISqlConnectionFactory _sqlConnectionFactory;
 
-    // Injetamos apenas a conexão com o banco, nada de Entity Framework aqui!
     public GetCashFlowQueryHandler(ISqlConnectionFactory sqlConnectionFactory)
     {
         _sqlConnectionFactory = sqlConnectionFactory;
@@ -19,7 +18,6 @@ public class GetCashFlowQueryHandler : IRequestHandler<GetCashFlowQuery, Result<
     {
         using var connection = _sqlConnectionFactory.GetOpenConnection();
 
-        // Query crua e otimizada para o banco (Sintaxe Oracle/SQL Padrão)
         const string sql = @"
             SELECT 
                 TO_CHAR(DueDate, 'MM/YYYY') AS MonthYear,
