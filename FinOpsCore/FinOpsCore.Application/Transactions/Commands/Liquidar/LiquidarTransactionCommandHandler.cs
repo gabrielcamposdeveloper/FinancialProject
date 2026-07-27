@@ -15,19 +15,16 @@ public class LiquidarTransactionCommandHandler : IRequestHandler<LiquidarTransac
 
     public async Task<Result> Handle(LiquidarTransactionCommand request, CancellationToken cancellationToken)
     {
-        // 1. Busca a entidade
         var transaction = await _repository.GetByIdAsync(request.TransactionId);
         
         if (transaction is null)
             return Result.Failure("Transação não encontrada.");
 
-        // 2. Executa a regra de negócio do Domínio
         var result = transaction.Liquidar(request.LiquidationDate);
         
         if (result.IsFailure)
-            return result; // Retorna o erro (ex: tentou liquidar com data futura)
+            return result;
 
-        // 3. Atualiza o estado e comita a transação no banco
         _repository.Update(transaction);
         var success = await _repository.UnitOfWork.CommitAsync(cancellationToken);
 
