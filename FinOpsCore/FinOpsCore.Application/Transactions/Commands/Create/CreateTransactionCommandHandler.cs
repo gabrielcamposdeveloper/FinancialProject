@@ -31,7 +31,7 @@ public class CreateTransactionCommandHandler : IRequestHandler<CreateTransaction
 
         if (!success)
         {
-            return Result<Guid>.Failure("Ocorreu um erro ao tentar salvar a transação no banco de dados.");
+            return Result<Guid>.Failure("An error occurred while trying to save the transaction to the database.");
         }
 
         return Result<Guid>.Success(transaction.Id);
