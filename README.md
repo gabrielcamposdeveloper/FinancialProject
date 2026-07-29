@@ -5,6 +5,7 @@
 ![.NET](https://img.shields.io/badge/.NET-8-512BD4?style=for-the-badge&logo=dotnet)
 ![C%23](https://img.shields.io/badge/C%23-239120?style=for-the-badge&logo=csharp)
 ![Angular](https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular)
+![Tailwind](https://img.shields.io/badge/Tailwind_v4-38B2AC?style=for-the-badge&logo=tailwind-css)
 ![Oracle](https://img.shields.io/badge/Oracle-F80000?style=for-the-badge&logo=oracle)
 ![Entity Framework Core](https://img.shields.io/badge/EF%20Core-6DB33F?style=for-the-badge)
 ![Dapper](https://img.shields.io/badge/Dapper-00599C?style=for-the-badge)
@@ -40,24 +41,23 @@ To support scalability and high throughput, the application adopts **CQRS (Comma
 
 - Entity Framework Core
 - Unit of Work
-- Rich Domain Model
-- Optimistic Concurrency
+- Rich Domain Model (Validations inside the Entity)
+- Optimistic Concurrency (RowVersion tracking)
 - ACID Transactions
-- FluentValidation
 - MediatR
 
-Business operations pass through the domain layer, ensuring consistency and protecting financial transactions.
+Business operations pass through the domain layer, ensuring consistency and protecting financial transactions without throwing costly exceptions, using the Result Pattern.
 
 ---
 
 ## 📖 Query Side (Read)
 
 - Dapper
-- Native SQL
+- Native SQL (Oracle Syntax)
 - Lightweight DTOs
 - Optimized Queries
 
-Read operations bypass ORM tracking, delivering significantly faster dashboard and reporting performance.
+Read operations bypass ORM tracking, opening direct connections to deliver significantly faster dashboard and reporting performance.
 
 ---
 
@@ -72,8 +72,7 @@ Read operations bypass ORM tracking, delivering significantly faster dashboard a
 | ✅ Repository Pattern | Persistence abstraction |
 | ✅ MediatR | Decoupled application layer |
 | ✅ Result Pattern | Business validation without exceptions |
-| ✅ Dependency Injection | Loose coupling |
-| ✅ Idempotency | Prevent duplicate financial requests |
+| ✅ Dependency Injection | Loose coupling via Extension Methods |
 
 ---
 
@@ -83,15 +82,13 @@ Read operations bypass ORM tracking, delivering significantly faster dashboard a
 
 | Technology | Description |
 |------------|-------------|
-| .NET 8 | Backend |
-| C# | Programming Language |
-| Entity Framework Core | Commands |
-| Dapper | High-performance Queries |
-| MediatR | CQRS |
-| FluentValidation | Validation |
-| LINQ | Data Manipulation |
-| xUnit | Unit Tests |
-| Moq | Mocking |
+| .NET 8 | Backend Framework |
+| C# 12 | Programming Language |
+| Entity Framework Core | Relational ORM for Commands |
+| Oracle.EntityFrameworkCore | Official Oracle Provider |
+| Dapper | Micro ORM for High-performance Queries |
+| MediatR | Mediator Pattern for CQRS |
+| xUnit / Moq | Unit Tests & Mocking (Planned) |
 
 ---
 
@@ -99,11 +96,10 @@ Read operations bypass ORM tracking, delivering significantly faster dashboard a
 
 | Technology | Description |
 |------------|-------------|
-| Angular | SPA |
-| TypeScript | Language |
-| SCSS | Styling |
+| Angular 19+ | Single Page Application (SPA) |
+| TypeScript | Strongly Typed Language |
+| Tailwind CSS v4 | Utility-first CSS Framework (Native CSS) |
 | RxJS | Reactive Programming |
-| HTTP Interceptors | Authentication & Error Handling |
 
 ---
 
@@ -111,11 +107,11 @@ Read operations bypass ORM tracking, delivering significantly faster dashboard a
 
 | Technology | Description |
 |------------|-------------|
-| Oracle Database | Relational Database |
+| Oracle Database | Relational Database (Dockerized XE) |
 | Docker | Containers |
-| Docker Compose | Local Environment |
-| Kubernetes | Deployment |
-| GitHub Actions | CI/CD |
+| Docker Compose | Local Environment Orchestration |
+| Kubernetes | Deployment (Planned) |
+| GitHub Actions | CI/CD (Planned) |
 
 ---
 
@@ -123,37 +119,36 @@ Read operations bypass ORM tracking, delivering significantly faster dashboard a
 
 ```text
 src
-├── FinancialSystem.Domain
-│   ├── Entities
-│   ├── ValueObjects
-│   ├── Enums
-│   ├── Events
-│   └── Interfaces
+├── FinOpsCore.Domain
+│   ├── Entities          # Rich Models (e.g., Transaction)
+│   ├── Common            # Shared constructs (e.g., Result Pattern)
+│   ├── Enums             # Domain Enumerators
+│   └── Interfaces        # IUnitOfWork, ITransactionRepository
 │
-├── FinancialSystem.Application
-│   ├── Commands
-│   ├── Queries
-│   ├── DTOs
-│   ├── Validators
-│   └── Behaviors
+├── FinOpsCore.Application
+│   ├── Transactions
+│   │   ├── Commands      # Create, Liquidar (Write ops)
+│   │   └── Queries       # GetCashFlow (Read ops / DTOs)
+│   └── Interfaces        # ISqlConnectionFactory
 │
-├── FinancialSystem.Infrastructure
-│   ├── Persistence
-│   ├── Dapper
-│   ├── Repositories
-│   └── Services
+├── FinOpsCore.Infrastructure
+│   ├── Data
+│   │   ├── Context       # AppDbContext (EF Core)
+│   │   ├── Mappings      # Fluent API (TransactionConfiguration)
+│   │   └── Connections   # OracleConnectionFactory (Dapper)
+│   └── Repositories      # TransactionRepository implementation
 │
-└── FinancialSystem.API
-    ├── Controllers
-    ├── Middleware
-    ├── Filters
-    └── Configuration
+└── FinOpsCore.API
+    ├── Controllers       # REST Endpoints via MediatR
+    ├── Extensions        # DependencyInjection (IoC Setup)
+    └── appsettings.json  # DB Connection Strings
 
 frontend
-└── financial-app
+└── finops-app            # Angular + Tailwind Application
 
 k8s
-└── deployment
+└── deployment            # Kubernetes Manifests
+
 ```
 
 ---
@@ -162,87 +157,69 @@ k8s
 
 ## Requirements
 
-- Docker Desktop
-- .NET SDK 8
-- Node.js
-- Angular CLI
+* Docker Desktop
+* .NET SDK 8.0
+* Node.js (v20+)
+* Angular CLI
 
 ---
 
 ### Clone Repository
 
 ```bash
-git clone https://github.com/your-user/finops-core.git
-
+git clone [https://github.com/gabrielcamposdeveloper/finops-core.git](https://github.com/gabrielcamposdeveloper/finops-core.git)
 cd finops-core
+
 ```
 
 ---
 
-### Start Oracle
+### Start Oracle Database
 
 ```bash
 docker compose up -d db
+
 ```
+
+*(Wait 1-2 minutes for the Oracle XE container to fully initialize).*
 
 ---
 
-### Apply Migrations
+### Apply Migrations and Run API
 
 ```bash
-cd src/FinancialSystem.API
-
+cd src/FinOpsCore.API
 dotnet ef database update
-
 dotnet run
+
 ```
 
-Swagger
+Swagger will be available at:
 
 ```
 https://localhost:5001/swagger
+
 ```
 
 ---
 
-### Angular
+### Run Angular Frontend
+
+Open a new terminal window:
 
 ```bash
-cd frontend/financial-app
-
+cd frontend/finops-app
 npm install
-
 ng serve
+
 ```
+
+The application will be available at:
 
 ```
 http://localhost:4200
+
 ```
-
----
-
-# 🧪 Tests
-
-```bash
-cd src
-
-dotnet test
-```
-
----
-
-# 📈 Main Features
-
-- Financial Reconciliation
-- Cash Flow Management
-- CQRS Architecture
-- Dashboard Queries
-- High Performance Reads
-- Rich Domain Validation
-- Transaction Management
-- Optimistic Concurrency
-- Idempotent Requests
-- Unit Testing
 
 ---
 
@@ -250,12 +227,8 @@ dotnet test
 
 **Gabriel Campos**
 
-[![GitHub](https://img.shields.io/badge/GitHub-gabrielcamposdeveloper-181717?style=for-the-badge&logo=github)](https://github.com/gabrielcamposdeveloper)
-
 ---
 
 # 📄 License
-
-![MIT](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 
 Licensed under the MIT License.
